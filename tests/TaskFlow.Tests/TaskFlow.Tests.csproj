@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="xunit" Version="2.5.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\TaskFlow.SharedKernel\TaskFlow.SharedKernel.csproj" />
+    <ProjectReference Include="..\..\src\TaskFlow.Infrastructure\TaskFlow.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Users\TaskFlow.Modules.Users.Domain\TaskFlow.Modules.Users.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Users\TaskFlow.Modules.Users.Application\TaskFlow.Modules.Users.Application.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Users\TaskFlow.Modules.Users.Infrastructure\TaskFlow.Modules.Users.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Projects\TaskFlow.Modules.Projects.Domain\TaskFlow.Modules.Projects.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Projects\TaskFlow.Modules.Projects.Application\TaskFlow.Modules.Projects.Application.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Projects\TaskFlow.Modules.Projects.Infrastructure\TaskFlow.Modules.Projects.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Tasks\TaskFlow.Modules.Tasks.Domain\TaskFlow.Modules.Tasks.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Tasks\TaskFlow.Modules.Tasks.Application\TaskFlow.Modules.Tasks.Application.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Tasks\TaskFlow.Modules.Tasks.Infrastructure\TaskFlow.Modules.Tasks.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Notifications\TaskFlow.Modules.Notifications.Domain\TaskFlow.Modules.Notifications.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Notifications\TaskFlow.Modules.Notifications.Application\TaskFlow.Modules.Notifications.Application.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Notifications\TaskFlow.Modules.Notifications.Infrastructure\TaskFlow.Modules.Notifications.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Reports\TaskFlow.Modules.Reports.Domain\TaskFlow.Modules.Reports.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Reports\TaskFlow.Modules.Reports.Application\TaskFlow.Modules.Reports.Application.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Reports\TaskFlow.Modules.Reports.Infrastructure\TaskFlow.Modules.Reports.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

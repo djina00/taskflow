@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\TaskFlow.SharedKernel\TaskFlow.SharedKernel.csproj" />
+    <ProjectReference Include="..\TaskFlow.Infrastructure\TaskFlow.Infrastructure.csproj" />
+    <ProjectReference Include="..\Modules\Users\TaskFlow.Modules.Users.Application\TaskFlow.Modules.Users.Application.csproj" />
+    <ProjectReference Include="..\Modules\Users\TaskFlow.Modules.Users.Infrastructure\TaskFlow.Modules.Users.Infrastructure.csproj" />
+    <ProjectReference Include="..\Modules\Projects\TaskFlow.Modules.Projects.Application\TaskFlow.Modules.Projects.Application.csproj" />
+    <ProjectReference Include="..\Modules\Projects\TaskFlow.Modules.Projects.Infrastructure\TaskFlow.Modules.Projects.Infrastructure.csproj" />
+    <ProjectReference Include="..\Modules\Tasks\TaskFlow.Modules.Tasks.Application\TaskFlow.Modules.Tasks.Application.csproj" />
+    <ProjectReference Include="..\Modules\Tasks\TaskFlow.Modules.Tasks.Infrastructure\TaskFlow.Modules.Tasks.Infrastructure.csproj" />
+    <ProjectReference Include="..\Modules\Notifications\TaskFlow.Modules.Notifications.Application\TaskFlow.Modules.Notifications.Application.csproj" />
+    <ProjectReference Include="..\Modules\Notifications\TaskFlow.Modules.Notifications.Infrastructure\TaskFlow.Modules.Notifications.Infrastructure.csproj" />
+    <ProjectReference Include="..\Modules\Reports\TaskFlow.Modules.Reports.Application\TaskFlow.Modules.Reports.Application.csproj" />
+    <ProjectReference Include="..\Modules\Reports\TaskFlow.Modules.Reports.Infrastructure\TaskFlow.Modules.Reports.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+</Project>
