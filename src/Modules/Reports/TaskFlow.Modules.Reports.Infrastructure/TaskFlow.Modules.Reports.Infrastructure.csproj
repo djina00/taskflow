@@ -3,6 +3,10 @@
   <ItemGroup>
     <ProjectReference Include="..\TaskFlow.Modules.Reports.Application\TaskFlow.Modules.Reports.Application.csproj" />
     <ProjectReference Include="..\..\..\TaskFlow.Infrastructure\TaskFlow.Infrastructure.csproj" />
+    <!-- The adapter bridges the Reports read-port to the Tasks store; only the
+         Infrastructure layer is allowed to know both sides. Reports' Application
+         and Domain layers stay decoupled from Tasks behind ITaskStatisticsProvider. -->
+    <ProjectReference Include="..\..\Tasks\TaskFlow.Modules.Tasks.Domain\TaskFlow.Modules.Tasks.Domain.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
