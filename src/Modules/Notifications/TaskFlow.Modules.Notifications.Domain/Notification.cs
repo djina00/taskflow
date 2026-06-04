@@ -1,4 +1,5 @@
 using TaskFlow.SharedKernel.Domain;
+using TaskFlow.SharedKernel.Domain.Events;
 using TaskFlow.SharedKernel.Results;
 
 namespace TaskFlow.Modules.Notifications.Domain;
@@ -41,7 +42,9 @@ public sealed class Notification : AggregateRoot
         if (string.IsNullOrWhiteSpace(message))
             return Error.Validation("A notification message is required.");
 
-        return new Notification(Guid.NewGuid(), recipientId, type, message.Trim(), DateTime.UtcNow);
+        var notification = new Notification(Guid.NewGuid(), recipientId, type, message.Trim(), DateTime.UtcNow);
+        notification.Raise(new NotificationCreatedEvent(notification.Id, recipientId));
+        return notification;
     }
 
     /// <summary>Marks the notification as read. Idempotency is treated as a conflict.</summary>

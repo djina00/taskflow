@@ -1,6 +1,9 @@
 using System.IO;
 using Microsoft.Extensions.DependencyInjection;
+using TaskFlow.Desktop.ViewModels;
 using TaskFlow.Infrastructure;
+using TaskFlow.SharedKernel.Domain;
+using TaskFlow.SharedKernel.Domain.Events;
 using TaskFlow.Modules.Notifications.Application;
 using TaskFlow.Modules.Notifications.Infrastructure;
 using TaskFlow.Modules.Projects.Application;
@@ -46,6 +49,26 @@ public static class ServiceConfiguration
             .AddTasksInfrastructure()
             .AddNotificationsInfrastructure()
             .AddReportsInfrastructure();
+
+        // Presentation layer: shared session, feature view models and the windows.
+        services.AddSingleton<SessionContext>();
+        services.AddSingleton<LoginViewModel>();
+        services.AddSingleton<RegisterViewModel>();
+        services.AddSingleton<ProjectsViewModel>();
+        services.AddSingleton<TasksViewModel>();
+        services.AddSingleton<NotificationsViewModel>();
+        services.AddSingleton<ReportsViewModel>();
+        services.AddSingleton<MainViewModel>();
+
+        // Live UI channel: the presentation layer subscribes to notification creation
+        // so the Notifications tab updates reactively instead of on manual refresh.
+        services.AddSingleton<IDomainEventHandler<NotificationCreatedEvent>, NotificationCreatedUiHandler>();
+
+        // Windows are transient so sign-out/sign-in can open a fresh one (a closed
+        // WPF window cannot be shown again).
+        services.AddTransient<LoginWindow>();
+        services.AddTransient<RegisterWindow>();
+        services.AddTransient<MainWindow>();
 
         return services.BuildServiceProvider();
     }

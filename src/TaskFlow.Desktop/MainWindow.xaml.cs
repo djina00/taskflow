@@ -1,23 +1,18 @@
-﻿using System.Text;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using TaskFlow.Desktop.ViewModels;
 
 namespace TaskFlow.Desktop;
 
 /// <summary>
-/// Interaction logic for MainWindow.xaml
+/// The application shell. Its data context is the <see cref="MainViewModel"/>,
+/// injected from the composition root; each tab binds to one of its feature view
+/// models.
 /// </summary>
 public partial class MainWindow : Window
 {
-    public MainWindow()
+    public MainWindow(MainViewModel viewModel)
     {
         InitializeComponent();
+        DataContext = viewModel;
     }
 }
