@@ -1,5 +1,5 @@
 using System.Collections.ObjectModel;
-using System.Windows.Input;
+using System.Linq;
 using TaskFlow.Desktop.Mvvm;
 using TaskFlow.Modules.Notifications.Application.Commands.MarkNotificationAsRead;
 using TaskFlow.Modules.Notifications.Application.Contracts;
@@ -13,31 +13,36 @@ namespace TaskFlow.Desktop.ViewModels;
 /// reactively by the event handlers when tasks are assigned or completed — and
 /// marks them read.
 /// </summary>
-public sealed class NotificationsViewModel : ViewModelBase
+public sealed class NotificationsViewModel : FeatureViewModelBase
 {
     private readonly ICommandDispatcher _commands;
     private readonly IQueryDispatcher _queries;
-    private readonly SessionContext _session;
 
-    private string _status = string.Empty;
     private NotificationDto? _selectedNotification;
+    private int _unreadCount;
 
     public NotificationsViewModel(ICommandDispatcher commands, IQueryDispatcher queries, SessionContext session)
+        : base(session)
     {
         _commands = commands;
         _queries = queries;
-        _session = session;
 
-        RefreshCommand = new AsyncRelayCommand(RefreshAsync, () => _session.IsLoggedIn);
+        RefreshCommand = new AsyncRelayCommand(RefreshAsync, () => Session.IsLoggedIn);
         MarkReadCommand = new AsyncRelayCommand(MarkReadAsync, () => _selectedNotification is not null);
-        _session.PropertyChanged += (_, _) => ((AsyncRelayCommand)RefreshCommand).RaiseCanExecuteChanged();
+        WireSessionToCommands(RefreshCommand);
     }
-
-    public SessionContext Session => _session;
 
     public ObservableCollection<NotificationDto> Notifications { get; } = new();
 
-    public string Status { get => _status; private set => SetProperty(ref _status, value); }
+    /// <summary>
+    /// Number of unread notifications for the signed-in user. Surfaced for the sidebar
+    /// badge so the unread count is visible without opening the Notifications tab.
+    /// </summary>
+    public int UnreadCount
+    {
+        get => _unreadCount;
+        private set => SetProperty(ref _unreadCount, value);
+    }
 
     public NotificationDto? SelectedNotification
     {
@@ -45,12 +50,14 @@ public sealed class NotificationsViewModel : ViewModelBase
         set
         {
             if (SetProperty(ref _selectedNotification, value))
-                ((AsyncRelayCommand)MarkReadCommand).RaiseCanExecuteChanged();
+                MarkReadCommand.RaiseCanExecuteChanged();
         }
     }
 
-    public ICommand RefreshCommand { get; }
-    public ICommand MarkReadCommand { get; }
+    public IRelayCommand RefreshCommand { get; }
+    public IRelayCommand MarkReadCommand { get; }
+
+    public override Task OnActivatedAsync() => RefreshAsync();
 
     /// <summary>
     /// Called when a notification was just created elsewhere in the app. If it is
@@ -59,7 +66,7 @@ public sealed class NotificationsViewModel : ViewModelBase
     /// </summary>
     public void OnNotificationCreated(Guid recipientId)
     {
-        if (recipientId == _session.CurrentUserId)
+        if (recipientId == Session.CurrentUserId)
             _ = RefreshAsync();
     }
 
@@ -68,22 +75,22 @@ public sealed class NotificationsViewModel : ViewModelBase
         if (_selectedNotification is null)
             return;
 
-        var result = await _commands.SendAsync(new MarkNotificationAsReadCommand(_selectedNotification.Id));
-        Status = result.IsFailure ? result.Error.Message : "Marked as read.";
+        await RunAsync(
+            () => _commands.SendAsync(new MarkNotificationAsReadCommand(_selectedNotification.Id)),
+            "Marked as read.");
         await RefreshAsync();
     }
 
     private async Task RefreshAsync()
     {
-        if (_session.CurrentUserId is not Guid userId)
+        if (Session.CurrentUserId is not Guid userId)
         {
             Notifications.Clear();
+            UnreadCount = 0;
             return;
         }
 
-        var notifications = await _queries.QueryAsync(new GetNotificationsForRecipientQuery(userId));
-        Notifications.Clear();
-        foreach (var notification in notifications)
-            Notifications.Add(notification);
+        Notifications.ReplaceAll(await _queries.QueryAsync(new GetNotificationsForRecipientQuery(userId)));
+        UnreadCount = Notifications.Count(n => !n.IsRead);
     }
 }

@@ -2,7 +2,9 @@ using Microsoft.Extensions.DependencyInjection;
 using TaskFlow.Modules.Projects.Application.Commands.AddProjectMember;
 using TaskFlow.Modules.Projects.Application.Commands.ArchiveProject;
 using TaskFlow.Modules.Projects.Application.Commands.CreateProject;
+using TaskFlow.Modules.Projects.Application.Commands.DeleteProject;
 using TaskFlow.Modules.Projects.Application.Commands.RemoveProjectMember;
+using TaskFlow.Modules.Projects.Application.Commands.UpdateProject;
 using TaskFlow.Modules.Projects.Application.Contracts;
 using TaskFlow.Modules.Projects.Application.Queries.GetAllProjects;
 using TaskFlow.Modules.Projects.Application.Queries.GetProjectById;
@@ -25,6 +27,8 @@ public static class DependencyInjection
         services.AddScoped<ICommandHandler<AddProjectMemberCommand, Result>, AddProjectMemberCommandHandler>();
         services.AddScoped<ICommandHandler<RemoveProjectMemberCommand, Result>, RemoveProjectMemberCommandHandler>();
         services.AddScoped<ICommandHandler<ArchiveProjectCommand, Result>, ArchiveProjectCommandHandler>();
+        services.AddScoped<ICommandHandler<UpdateProjectCommand, Result>, UpdateProjectCommandHandler>();
+        services.AddScoped<ICommandHandler<DeleteProjectCommand, Result>, DeleteProjectCommandHandler>();
 
         services.AddScoped<IQueryHandler<GetProjectByIdQuery, Result<ProjectDto>>, GetProjectByIdQueryHandler>();
         services.AddScoped<IQueryHandler<GetAllProjectsQuery, IReadOnlyList<ProjectDto>>, GetAllProjectsQueryHandler>();

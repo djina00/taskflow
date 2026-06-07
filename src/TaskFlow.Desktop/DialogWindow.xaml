@@ -1,0 +1,10 @@
+<Window x:Class="TaskFlow.Desktop.DialogWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="{Binding DialogTitle}"
+        SizeToContent="WidthAndHeight" MinWidth="380"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize" ShowInTaskbar="False"
+        Background="{StaticResource BgBrush}">
+    <!-- The hosted dialog view model is rendered by its matching DataTemplate (App.xaml). -->
+    <ContentControl Content="{Binding}" Margin="16" />
+</Window>

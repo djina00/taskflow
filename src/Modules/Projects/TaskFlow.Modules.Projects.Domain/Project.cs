@@ -103,5 +103,18 @@ public sealed class Project : AggregateRoot
         return Result.Success();
     }
 
+    /// <summary>Renames the project and updates its description. An archived project is frozen.</summary>
+    public Result UpdateDetails(string name, string? description)
+    {
+        if (IsArchived)
+            return Result.Failure(Error.Conflict("Cannot edit an archived project."));
+        if (string.IsNullOrWhiteSpace(name))
+            return Result.Failure(Error.Validation("A project name is required."));
+
+        Name = name.Trim();
+        Description = (description ?? string.Empty).Trim();
+        return Result.Success();
+    }
+
     public bool HasMember(Guid userId) => _members.Any(member => member.UserId == userId);
 }

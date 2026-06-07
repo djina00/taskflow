@@ -6,12 +6,31 @@ namespace TaskFlow.Tests.Domain;
 public class TaskItemTests
 {
     private static TaskItem NewTask() =>
-        TaskItem.Create(Guid.NewGuid(), "Punch the cards", null, TaskPriority.High).Value;
+        TaskItem.Create(Guid.NewGuid(), "Punch the cards", null, TaskPriority.High, Guid.NewGuid()).Value;
 
     [Fact]
     public void Create_requires_a_title()
     {
-        var result = TaskItem.Create(Guid.NewGuid(), "   ", null, TaskPriority.Low);
+        var result = TaskItem.Create(Guid.NewGuid(), "   ", null, TaskPriority.Low, Guid.NewGuid());
+
+        Assert.True(result.IsFailure);
+        Assert.Equal("Error.Validation", result.Error.Code);
+    }
+
+    [Fact]
+    public void Create_records_the_reporter()
+    {
+        var reporter = Guid.NewGuid();
+
+        var task = TaskItem.Create(Guid.NewGuid(), "Punch the cards", null, TaskPriority.High, reporter).Value;
+
+        Assert.Equal(reporter, task.ReporterId);
+    }
+
+    [Fact]
+    public void Create_requires_a_reporter()
+    {
+        var result = TaskItem.Create(Guid.NewGuid(), "Punch the cards", null, TaskPriority.High, Guid.Empty);
 
         Assert.True(result.IsFailure);
         Assert.Equal("Error.Validation", result.Error.Code);

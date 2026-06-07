@@ -1,86 +1,59 @@
 <UserControl x:Class="TaskFlow.Desktop.Views.ReportsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ctrl="clr-namespace:TaskFlow.Desktop.Controls"
              mc:Ignorable="d"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              d:DesignWidth="860" d:DesignHeight="460">
-    <UserControl.Resources>
-        <Style x:Key="Metric" TargetType="TextBlock">
-            <Setter Property="Margin" Value="0,4" />
-            <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
-        </Style>
-        <Style x:Key="MetricValue" TargetType="TextBlock">
-            <Setter Property="Margin" Value="0,4" />
-            <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-        </Style>
-    </UserControl.Resources>
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="4">
+            <ctrl:CardHeader Title="Reports" ActionCommand="{Binding RefreshCommand}"
+                             Margin="{StaticResource SectionMargin}" />
 
-    <DockPanel Margin="4">
-        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
-            <TextBlock Text="Reports" Style="{StaticResource H1}" VerticalAlignment="Center" />
-            <Button Content="Refresh" Style="{StaticResource PrimaryButton}" Command="{Binding RefreshCommand}"
-                    DockPanel.Dock="Right" HorizontalAlignment="Right" />
-        </DockPanel>
+            <ctrl:LabeledField Label="Project" Width="{StaticResource FormColumnWidth}" HorizontalAlignment="Left">
+                <ComboBox ItemsSource="{Binding ProjectSelection.Projects}"
+                          SelectedItem="{Binding ProjectSelection.Selected}" DisplayMemberPath="Name" />
+            </ctrl:LabeledField>
 
-        <Grid VerticalAlignment="Top">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
+            <!-- Project statistics -->
+            <TextBlock Text="{Binding Session.SelectedProjectName, StringFormat='Project — {0}'}"
+                       Style="{StaticResource H2}" Margin="0,18,0,0" />
+            <TextBlock Text="Select a project to see its statistics." Style="{StaticResource Muted}" Margin="0,8,0,0"
+                       Visibility="{Binding Session.HasSelectedProject, Converter={StaticResource InverseBoolToVisibility}}" />
+            <UniformGrid Columns="4" Margin="0,8,0,0"
+                         Visibility="{Binding Session.HasSelectedProject, Converter={StaticResource BoolToVisibility}}">
+                <ctrl:StatCard Caption="Total tasks" Value="{Binding ProjectReport.TotalTasks}"
+                               Accent="{StaticResource PrimaryBrush}" />
+                <ctrl:StatCard Caption="Completed" Value="{Binding ProjectReport.CompletedTasks}"
+                               Accent="{StaticResource SuccessBrush}" />
+                <ctrl:StatCard Caption="Open" Value="{Binding ProjectReport.OpenTasks}"
+                               Accent="{StaticResource WarnBrush}" />
+                <ctrl:StatCard Caption="Completion rate" Accent="{StaticResource SuccessBrush}"
+                               Value="{Binding ProjectReport.CompletionRate, StringFormat='{}{0:P0}'}">
+                    <ProgressBar Style="{StaticResource StatProgress}" Value="{Binding ProjectReport.CompletionRate}"
+                                 Foreground="{StaticResource SuccessBrush}" />
+                </ctrl:StatCard>
+            </UniformGrid>
 
-            <Border Grid.Column="0" Style="{StaticResource Card}" Margin="0,0,8,0" VerticalAlignment="Top">
-                <StackPanel>
-                    <TextBlock Text="{Binding Session.SelectedProjectName, StringFormat='Project — {0}'}" Style="{StaticResource H2}" />
-                    <TextBlock Text="Select a project on the Projects tab." Style="{StaticResource Muted}" Margin="0,8,0,0"
-                               Visibility="{Binding Session.HasSelectedProject, Converter={StaticResource InverseBoolToVisibility}}" />
-                    <Grid Margin="0,12,0,0" Visibility="{Binding Session.HasSelectedProject, Converter={StaticResource BoolToVisibility}}">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="Total tasks" Style="{StaticResource Metric}" />
-                            <TextBlock Text="Completed" Style="{StaticResource Metric}" />
-                            <TextBlock Text="Open" Style="{StaticResource Metric}" />
-                            <TextBlock Text="Completion rate" Style="{StaticResource Metric}" />
-                        </StackPanel>
-                        <StackPanel Grid.Column="1" HorizontalAlignment="Right">
-                            <TextBlock Text="{Binding ProjectReport.TotalTasks}" Style="{StaticResource MetricValue}" />
-                            <TextBlock Text="{Binding ProjectReport.CompletedTasks}" Style="{StaticResource MetricValue}" />
-                            <TextBlock Text="{Binding ProjectReport.OpenTasks}" Style="{StaticResource MetricValue}" />
-                            <TextBlock Text="{Binding ProjectReport.CompletionRate, StringFormat='{}{0:P0}'}" Style="{StaticResource MetricValue}" />
-                        </StackPanel>
-                    </Grid>
-                </StackPanel>
-            </Border>
-
-            <Border Grid.Column="1" Style="{StaticResource Card}" Margin="8,0,0,0" VerticalAlignment="Top">
-                <StackPanel>
-                    <TextBlock Text="{Binding Session.CurrentUserName, StringFormat='Your productivity — {0}'}" Style="{StaticResource H2}" />
-                    <TextBlock Text="Sign in to see your productivity." Style="{StaticResource Muted}" Margin="0,8,0,0"
-                               Visibility="{Binding Session.IsLoggedIn, Converter={StaticResource InverseBoolToVisibility}}" />
-                    <Grid Margin="0,12,0,0" Visibility="{Binding Session.IsLoggedIn, Converter={StaticResource BoolToVisibility}}">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="Assigned tasks" Style="{StaticResource Metric}" />
-                            <TextBlock Text="Completed" Style="{StaticResource Metric}" />
-                            <TextBlock Text="Points" Style="{StaticResource Metric}" />
-                            <TextBlock Text="Completion rate" Style="{StaticResource Metric}" />
-                        </StackPanel>
-                        <StackPanel Grid.Column="1" HorizontalAlignment="Right">
-                            <TextBlock Text="{Binding UserProductivity.AssignedTasks}" Style="{StaticResource MetricValue}" />
-                            <TextBlock Text="{Binding UserProductivity.CompletedTasks}" Style="{StaticResource MetricValue}" />
-                            <TextBlock Text="{Binding UserProductivity.Points}" Style="{StaticResource MetricValue}" />
-                            <TextBlock Text="{Binding UserProductivity.CompletionRate, StringFormat='{}{0:P0}'}" Style="{StaticResource MetricValue}" />
-                        </StackPanel>
-                    </Grid>
-                </StackPanel>
-            </Border>
-        </Grid>
-    </DockPanel>
+            <!-- User productivity -->
+            <TextBlock Text="{Binding Session.CurrentUserName, StringFormat='Your productivity — {0}'}"
+                       Style="{StaticResource H2}" Margin="0,20,0,0" />
+            <TextBlock Text="Sign in to see your productivity." Style="{StaticResource Muted}" Margin="0,8,0,0"
+                       Visibility="{Binding Session.IsLoggedIn, Converter={StaticResource InverseBoolToVisibility}}" />
+            <UniformGrid Columns="4" Margin="0,8,0,0"
+                         Visibility="{Binding Session.IsLoggedIn, Converter={StaticResource BoolToVisibility}}">
+                <ctrl:StatCard Caption="Assigned tasks" Value="{Binding UserProductivity.AssignedTasks}"
+                               Accent="{StaticResource PrimaryBrush}" />
+                <ctrl:StatCard Caption="Completed" Value="{Binding UserProductivity.CompletedTasks}"
+                               Accent="{StaticResource SuccessBrush}" />
+                <ctrl:StatCard Caption="Points" Value="{Binding UserProductivity.Points}"
+                               Accent="{StaticResource WarnBrush}" />
+                <ctrl:StatCard Caption="Completion rate" Accent="{StaticResource PrimaryBrush}"
+                               Value="{Binding UserProductivity.CompletionRate, StringFormat='{}{0:P0}'}">
+                    <ProgressBar Style="{StaticResource StatProgress}" Value="{Binding UserProductivity.CompletionRate}" />
+                </ctrl:StatCard>
+            </UniformGrid>
+        </StackPanel>
+    </ScrollViewer>
 </UserControl>

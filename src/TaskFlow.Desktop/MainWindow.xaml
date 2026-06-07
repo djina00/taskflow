@@ -4,35 +4,74 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:views="clr-namespace:TaskFlow.Desktop.Views"
+        xmlns:vm="clr-namespace:TaskFlow.Desktop.ViewModels"
         mc:Ignorable="d"
         Title="TaskFlow" Height="620" Width="920"
         WindowStartupLocation="CenterScreen"
         Background="{StaticResource BgBrush}">
+    <Window.Resources>
+        <!-- One style for every sidebar entry: it wires the navigation command and
+             highlights itself when its section is the active one. -->
+        <Style x:Key="SidebarNavItem" TargetType="Button" BasedOn="{StaticResource SidebarNavButton}">
+            <Setter Property="Command" Value="{Binding NavigateCommand}" />
+            <Style.Triggers>
+                <DataTrigger Value="True">
+                    <DataTrigger.Binding>
+                        <MultiBinding Converter="{StaticResource SectionActive}">
+                            <Binding Path="DataContext.ActiveSection" RelativeSource="{RelativeSource AncestorType=Window}" />
+                            <Binding Path="CommandParameter" RelativeSource="{RelativeSource Self}" />
+                        </MultiBinding>
+                    </DataTrigger.Binding>
+                    <Setter Property="Background" Value="{StaticResource SidebarActiveBrush}" />
+                    <Setter Property="Foreground" Value="{StaticResource SidebarActiveTextBrush}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- The content region renders the active feature view model through its view. -->
+        <DataTemplate DataType="{x:Type vm:ProjectsViewModel}">
+            <views:ProjectsView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:TasksViewModel}">
+            <views:TasksView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:NotificationsViewModel}">
+            <views:NotificationsView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ReportsViewModel}">
+            <views:ReportsView />
+        </DataTemplate>
+    </Window.Resources>
+
     <DockPanel>
         <Border DockPanel.Dock="Top" Background="{StaticResource HeaderBrush}" Padding="20,12">
             <DockPanel>
                 <TextBlock Text="TaskFlow" Foreground="White" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" />
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
-                    <TextBlock Foreground="#CBD5E1" VerticalAlignment="Center" Margin="0,0,12,0"
+                    <TextBlock Foreground="{StaticResource HeaderSubtleBrush}" VerticalAlignment="Center" Margin="0,0,12,0"
                                Text="{Binding Session.CurrentUserName, StringFormat='Signed in as {0}'}" />
                     <Button Content="Sign out" Command="{Binding SignOutCommand}" Padding="12,5" />
                 </StackPanel>
             </DockPanel>
         </Border>
 
-        <TabControl Margin="12,8,12,12">
-            <TabItem Header="Projects">
-                <views:ProjectsView DataContext="{Binding Projects}" />
-            </TabItem>
-            <TabItem Header="Tasks">
-                <views:TasksView DataContext="{Binding Tasks}" />
-            </TabItem>
-            <TabItem Header="Notifications">
-                <views:NotificationsView DataContext="{Binding Notifications}" />
-            </TabItem>
-            <TabItem Header="Reports">
-                <views:ReportsView DataContext="{Binding Reports}" />
-            </TabItem>
-        </TabControl>
+        <Border DockPanel.Dock="Left" Width="190" Background="{StaticResource SidebarBrush}">
+            <StackPanel>
+                <Button Content="Projects" CommandParameter="Projects" Style="{StaticResource SidebarNavItem}" />
+                <Button Content="Tasks" CommandParameter="Tasks" Style="{StaticResource SidebarNavItem}" />
+                <Button CommandParameter="Notifications" Style="{StaticResource SidebarNavItem}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Notifications" VerticalAlignment="Center" />
+                        <Border Style="{StaticResource NavBadge}" Margin="8,0,0,0"
+                                Visibility="{Binding Notifications.UnreadCount, Converter={StaticResource CountToVisibility}}">
+                            <TextBlock Text="{Binding Notifications.UnreadCount}" Style="{StaticResource NavBadgeText}" />
+                        </Border>
+                    </StackPanel>
+                </Button>
+                <Button Content="Reports" CommandParameter="Reports" Style="{StaticResource SidebarNavItem}" />
+            </StackPanel>
+        </Border>
+
+        <ContentControl Content="{Binding CurrentViewModel}" Margin="12" />
     </DockPanel>
 </Window>

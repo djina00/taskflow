@@ -3,38 +3,25 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ctrl="clr-namespace:TaskFlow.Desktop.Controls"
         mc:Ignorable="d"
         Title="TaskFlow — Sign in" Height="480" Width="420"
         WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize"
         Background="{StaticResource BgBrush}">
     <Grid>
-        <Border Style="{StaticResource Card}" Width="340" VerticalAlignment="Center"
-                HorizontalAlignment="Center" Padding="28">
+        <ctrl:AuthCard Subtitle="Sign in to your account"
+                       PrimaryText="Log in" PrimaryCommand="{Binding LoginCommand}"
+                       LinkPrompt="Don't have an account?" LinkText="Create one"
+                       LinkCommand="{Binding GoToRegisterCommand}"
+                       StatusText="{Binding Status}">
             <StackPanel>
-                <TextBlock Text="TaskFlow" FontSize="26" FontWeight="Bold"
-                           Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Center" />
-                <TextBlock Text="Sign in to your account" Style="{StaticResource Muted}"
-                           HorizontalAlignment="Center" Margin="0,2,0,18" />
-
-                <TextBlock Text="Email" Style="{StaticResource FieldLabel}" />
-                <TextBox Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" />
-
-                <TextBlock Text="Password" Style="{StaticResource FieldLabel}" />
-                <PasswordBox x:Name="PasswordInput" />
-
-                <Button Content="Log in" Style="{StaticResource PrimaryButton}"
-                        Command="{Binding LoginCommand}" Margin="0,20,0,0" />
-
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,14,0,0">
-                    <TextBlock Text="Don't have an account?" Style="{StaticResource Muted}"
-                               VerticalAlignment="Center" />
-                    <Button Content="Create one" Command="{Binding GoToRegisterCommand}"
-                            Style="{StaticResource LinkButton}" Margin="6,0,0,0" />
-                </StackPanel>
-
-                <TextBlock Text="{Binding Status}" Style="{StaticResource StatusText}"
-                           Foreground="#DC2626" HorizontalAlignment="Center" />
+                <ctrl:LabeledField Label="Email">
+                    <TextBox Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" />
+                </ctrl:LabeledField>
+                <ctrl:LabeledField Label="Password">
+                    <PasswordBox x:Name="PasswordInput" />
+                </ctrl:LabeledField>
             </StackPanel>
-        </Border>
+        </ctrl:AuthCard>
     </Grid>
 </Window>

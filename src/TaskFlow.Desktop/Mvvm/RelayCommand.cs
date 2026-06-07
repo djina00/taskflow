@@ -1,9 +1,7 @@
-using System.Windows.Input;
-
 namespace TaskFlow.Desktop.Mvvm;
 
-/// <summary>A synchronous <see cref="ICommand"/> for simple, non-async UI actions (e.g. sign out).</summary>
-public sealed class RelayCommand : ICommand
+/// <summary>A synchronous <see cref="IRelayCommand"/> for simple, non-async UI actions (e.g. sign out).</summary>
+public sealed class RelayCommand : IRelayCommand
 {
     private readonly Action _execute;
     private readonly Func<bool>? _canExecute;

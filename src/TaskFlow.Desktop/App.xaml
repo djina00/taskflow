@@ -2,7 +2,9 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:TaskFlow.Desktop"
-             xmlns:conv="clr-namespace:TaskFlow.Desktop.Converters">
+             xmlns:conv="clr-namespace:TaskFlow.Desktop.Converters"
+             xmlns:vm="clr-namespace:TaskFlow.Desktop.ViewModels"
+             xmlns:views="clr-namespace:TaskFlow.Desktop.Views">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -12,6 +14,22 @@
             <conv:BoolToVisibilityConverter x:Key="BoolToVisibility" />
             <conv:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibility" />
             <conv:JoinStringsConverter x:Key="JoinStrings" />
+            <conv:SectionActiveConverter x:Key="SectionActive" />
+            <conv:CountToVisibilityConverter x:Key="CountToVisibility" />
+
+            <!-- The modal dialog host renders its view model through these templates. -->
+            <DataTemplate DataType="{x:Type vm:ProjectDetailViewModel}">
+                <views:ProjectDetailView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:TaskDetailViewModel}">
+                <views:TaskDetailView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:ProjectCreateViewModel}">
+                <views:ProjectCreateView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:TaskCreateViewModel}">
+                <views:TaskCreateView />
+            </DataTemplate>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

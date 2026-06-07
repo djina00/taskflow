@@ -24,7 +24,7 @@ public sealed class CreateTaskCommandHandler
             && (!Enum.TryParse(command.Priority, ignoreCase: true, out priority) || !Enum.IsDefined(priority)))
             return Error.Validation($"'{command.Priority}' is not a valid task priority.");
 
-        var result = TaskItem.Create(command.ProjectId, command.Title ?? string.Empty, command.Description, priority);
+        var result = TaskItem.Create(command.ProjectId, command.Title ?? string.Empty, command.Description, priority, command.ReporterId);
         if (result.IsFailure)
             return result.Error;
 

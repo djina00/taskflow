@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
-using System.Windows.Input;
 using TaskFlow.Desktop.Mvvm;
-using TaskFlow.Modules.Projects.Application.Commands.CreateProject;
+using TaskFlow.Desktop.Services;
+using TaskFlow.Modules.Projects.Application.Commands.DeleteProject;
 using TaskFlow.Modules.Projects.Application.Contracts;
 using TaskFlow.Modules.Projects.Application.Queries.GetAllProjects;
 using TaskFlow.SharedKernel.Messaging;
@@ -9,78 +9,85 @@ using TaskFlow.SharedKernel.Messaging;
 namespace TaskFlow.Desktop.ViewModels;
 
 /// <summary>
-/// Drives the Projects tab: create a project owned by the signed-in user, list all
-/// projects, and choose the one the Tasks and Reports tabs work against.
+/// Drives the Projects section: the list shows every project full-width, with an
+/// "Add project" button above it that opens the creation dialog. Double-clicking a
+/// project opens its detail dialog for editing, and each row carries a delete action —
+/// so managing a project happens on the project itself, never in an inline form.
 /// </summary>
-public sealed class ProjectsViewModel : ViewModelBase
+public sealed class ProjectsViewModel : FeatureViewModelBase
 {
     private readonly ICommandDispatcher _commands;
     private readonly IQueryDispatcher _queries;
-    private readonly SessionContext _session;
+    private readonly Func<ProjectDto, ProjectDetailViewModel> _detailFactory;
+    private readonly Func<ProjectCreateViewModel> _createFactory;
+    private readonly IDialogService _dialogs;
+    private readonly IConfirmationService _confirm;
 
-    private string _name = string.Empty;
-    private string _description = string.Empty;
-    private string _status = string.Empty;
     private ProjectDto? _selectedProject;
 
-    public ProjectsViewModel(ICommandDispatcher commands, IQueryDispatcher queries, SessionContext session)
+    public ProjectsViewModel(ICommandDispatcher commands, IQueryDispatcher queries, SessionContext session,
+        Func<ProjectDto, ProjectDetailViewModel> detailFactory, Func<ProjectCreateViewModel> createFactory,
+        IDialogService dialogs, IConfirmationService confirm)
+        : base(session)
     {
         _commands = commands;
         _queries = queries;
-        _session = session;
+        _detailFactory = detailFactory;
+        _createFactory = createFactory;
+        _dialogs = dialogs;
+        _confirm = confirm;
 
-        CreateCommand = new AsyncRelayCommand(CreateAsync, () => _session.IsLoggedIn);
+        AddCommand = new AsyncRelayCommand(AddAsync, () => Session.IsLoggedIn);
         RefreshCommand = new AsyncRelayCommand(RefreshAsync);
-        _session.PropertyChanged += (_, _) => ((AsyncRelayCommand)CreateCommand).RaiseCanExecuteChanged();
+        OpenSelectedCommand = new AsyncRelayCommand(OpenSelectedAsync, () => _selectedProject is not null);
+        DeleteCommand = new AsyncRelayCommand<ProjectDto>(DeleteAsync);
+        WireSessionToCommands(AddCommand);
     }
-
-    public SessionContext Session => _session;
 
     public ObservableCollection<ProjectDto> Projects { get; } = new();
 
-    public string Name { get => _name; set => SetProperty(ref _name, value); }
-    public string Description { get => _description; set => SetProperty(ref _description, value); }
-    public string Status { get => _status; private set => SetProperty(ref _status, value); }
-
+    /// <summary>The project picked in the list; double-clicking it opens its detail dialog.</summary>
     public ProjectDto? SelectedProject
     {
         get => _selectedProject;
-        set
-        {
-            if (SetProperty(ref _selectedProject, value) && value is not null)
-                _session.SelectProject(value.Id, value.Name);
-        }
+        set { if (SetProperty(ref _selectedProject, value)) OpenSelectedCommand.RaiseCanExecuteChanged(); }
     }
 
-    public ICommand CreateCommand { get; }
-    public ICommand RefreshCommand { get; }
+    public IRelayCommand AddCommand { get; }
+    public IRelayCommand RefreshCommand { get; }
+    public IRelayCommand OpenSelectedCommand { get; }
+    public IRelayCommand DeleteCommand { get; }
 
-    private async Task CreateAsync()
+    public override Task OnActivatedAsync() => RefreshAsync();
+
+    private async Task AddAsync()
     {
-        if (_session.CurrentUserId is not Guid ownerId)
-        {
-            Status = "Sign in first.";
-            return;
-        }
+        if (_dialogs.ShowDialog(_createFactory()))
+            await RefreshAsync();
+    }
 
-        var result = await _commands.SendAsync(new CreateProjectCommand(Name, ownerId, Description));
-        if (result.IsFailure)
-        {
-            Status = result.Error.Message;
+    private async Task OpenSelectedAsync()
+    {
+        if (_selectedProject is not { } project)
             return;
-        }
 
-        Status = $"Created project '{result.Value.Name}'.";
-        Name = string.Empty;
-        Description = string.Empty;
+        if (_dialogs.ShowDialog(_detailFactory(project)))
+            await RefreshAsync();
+    }
+
+    // Deletes a project straight from its row in the list, after a confirmation prompt,
+    // so removing a project no longer requires opening its detail dialog.
+    private async Task DeleteAsync(ProjectDto project)
+    {
+        if (!_confirm.Confirm("Delete project", $"Delete project '{project.Name}'? This cannot be undone."))
+            return;
+
+        await RunAsync(
+            () => _commands.SendAsync(new DeleteProjectCommand(project.Id)),
+            $"Deleted project '{project.Name}'.");
         await RefreshAsync();
     }
 
-    private async Task RefreshAsync()
-    {
-        var projects = await _queries.QueryAsync(new GetAllProjectsQuery());
-        Projects.Clear();
-        foreach (var project in projects)
-            Projects.Add(project);
-    }
+    private async Task RefreshAsync() =>
+        Projects.ReplaceAll(await _queries.QueryAsync(new GetAllProjectsQuery()));
 }

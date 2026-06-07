@@ -17,13 +17,14 @@ public sealed class TaskItem : AggregateRoot
 {
     private readonly List<Comment> _comments = new();
 
-    private TaskItem(Guid id, Guid projectId, string title, string description, TaskPriority priority, DateTime createdOnUtc)
+    private TaskItem(Guid id, Guid projectId, string title, string description, TaskPriority priority, Guid reporterId, DateTime createdOnUtc)
         : base(id)
     {
         ProjectId = projectId;
         Title = title;
         Description = description;
         Priority = priority;
+        ReporterId = reporterId;
         Status = TaskItemStatus.Todo;
         CreatedOnUtc = createdOnUtc;
     }
@@ -32,6 +33,9 @@ public sealed class TaskItem : AggregateRoot
     private TaskItem() { }
 
     public Guid ProjectId { get; private set; }
+
+    /// <summary>The user who created (reported) the task.</summary>
+    public Guid ReporterId { get; private set; }
 
     public string Title { get; private set; } = string.Empty;
 
@@ -53,15 +57,20 @@ public sealed class TaskItem : AggregateRoot
 
     public bool IsCompleted => Status == TaskItemStatus.Done;
 
-    /// <summary>Factory for a brand-new task. The task starts unassigned and in the Todo state.</summary>
-    public static Result<TaskItem> Create(Guid projectId, string title, string? description, TaskPriority priority)
+    /// <summary>
+    /// Factory for a brand-new task. The task starts unassigned and in the Todo state;
+    /// the reporter is the user who created it.
+    /// </summary>
+    public static Result<TaskItem> Create(Guid projectId, string title, string? description, TaskPriority priority, Guid reporterId)
     {
         if (projectId == Guid.Empty)
             return Error.Validation("A project is required.");
         if (string.IsNullOrWhiteSpace(title))
             return Error.Validation("A task title is required.");
+        if (reporterId == Guid.Empty)
+            return Error.Validation("A reporter is required.");
 
-        return new TaskItem(Guid.NewGuid(), projectId, title.Trim(), (description ?? string.Empty).Trim(), priority, DateTime.UtcNow);
+        return new TaskItem(Guid.NewGuid(), projectId, title.Trim(), (description ?? string.Empty).Trim(), priority, reporterId, DateTime.UtcNow);
     }
 
     /// <summary>Assigns (or reassigns) the task to a user. A completed task cannot be reassigned.</summary>
@@ -98,6 +107,18 @@ public sealed class TaskItem : AggregateRoot
         Status = TaskItemStatus.Done;
         CompletedOnUtc = DateTime.UtcNow;
         Raise(new TaskCompletedEvent(Id, AssigneeId, Title));
+        return Result.Success();
+    }
+
+    /// <summary>Updates the task's title, description and priority.</summary>
+    public Result UpdateDetails(string title, string? description, TaskPriority priority)
+    {
+        if (string.IsNullOrWhiteSpace(title))
+            return Result.Failure(Error.Validation("A task title is required."));
+
+        Title = title.Trim();
+        Description = (description ?? string.Empty).Trim();
+        Priority = priority;
         return Result.Success();
     }
 

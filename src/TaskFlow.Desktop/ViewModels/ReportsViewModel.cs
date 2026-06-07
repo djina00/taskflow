@@ -1,4 +1,3 @@
-using System.Windows.Input;
 using TaskFlow.Desktop.Mvvm;
 using TaskFlow.Modules.Reports.Application.Contracts;
 using TaskFlow.Modules.Reports.Application.Queries.GetProjectStatistics;
@@ -12,43 +11,53 @@ namespace TaskFlow.Desktop.ViewModels;
 /// signed-in user's productivity. The data is computed by the Reports module, which
 /// reads the Tasks store through its port — the read side stays decoupled from Tasks.
 /// </summary>
-public sealed class ReportsViewModel : ViewModelBase
+public sealed class ReportsViewModel : FeatureViewModelBase
 {
     private readonly IQueryDispatcher _queries;
-    private readonly SessionContext _session;
 
     private ProjectReportDto? _projectReport;
     private UserProductivityDto? _userProductivity;
-    private string _status = string.Empty;
 
-    public ReportsViewModel(IQueryDispatcher queries, SessionContext session)
+    public ReportsViewModel(IQueryDispatcher queries, SessionContext session,
+        ProjectSelectionViewModel projectSelection)
+        : base(session)
     {
         _queries = queries;
-        _session = session;
+        ProjectSelection = projectSelection;
 
         RefreshCommand = new AsyncRelayCommand(RefreshAsync);
-        _session.PropertyChanged += (_, _) => OnPropertyChanged(nameof(Session));
+        // The view binds the card headers to Session.* (selected project / user), and
+        // the figures depend on the selection, so reload the reports whenever it changes.
+        Session.PropertyChanged += async (_, _) =>
+        {
+            OnPropertyChanged(nameof(Session));
+            await RefreshAsync();
+        };
     }
 
-    public SessionContext Session => _session;
+    /// <summary>The shared project chooser shown at the top of the page.</summary>
+    public ProjectSelectionViewModel ProjectSelection { get; }
 
     public ProjectReportDto? ProjectReport { get => _projectReport; private set => SetProperty(ref _projectReport, value); }
     public UserProductivityDto? UserProductivity { get => _userProductivity; private set => SetProperty(ref _userProductivity, value); }
-    public string Status { get => _status; private set => SetProperty(ref _status, value); }
 
-    public ICommand RefreshCommand { get; }
+    public IRelayCommand RefreshCommand { get; }
+
+    public override async Task OnActivatedAsync()
+    {
+        await ProjectSelection.LoadAsync();
+        await RefreshAsync();
+    }
 
     private async Task RefreshAsync()
     {
-        if (_session.SelectedProjectId is Guid projectId)
-            ProjectReport = await _queries.QueryAsync(new GetProjectStatisticsQuery(projectId));
-        else
-            ProjectReport = null;
+        ProjectReport = Session.SelectedProjectId is Guid projectId
+            ? await _queries.QueryAsync(new GetProjectStatisticsQuery(projectId))
+            : null;
 
-        if (_session.CurrentUserId is Guid userId)
-            UserProductivity = await _queries.QueryAsync(new GetUserProductivityQuery(userId));
-        else
-            UserProductivity = null;
+        UserProductivity = Session.CurrentUserId is Guid userId
+            ? await _queries.QueryAsync(new GetUserProductivityQuery(userId))
+            : null;
 
         Status = "Updated.";
     }

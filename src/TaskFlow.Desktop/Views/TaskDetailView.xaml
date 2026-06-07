@@ -1,0 +1,61 @@
+<UserControl x:Class="TaskFlow.Desktop.Views.TaskDetailView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ctrl="clr-namespace:TaskFlow.Desktop.Controls">
+    <StackPanel Width="400">
+        <!-- Header: what this is, who reported it, and the live workflow state -->
+        <DockPanel>
+            <ctrl:StatusBadge DockPanel.Dock="Right" Status="{Binding StatusDisplay}" />
+            <StackPanel>
+                <TextBlock Text="Edit task" Style="{StaticResource H2}" />
+                <TextBlock Text="{Binding ReporterName, StringFormat='Reported by {0}'}"
+                           Style="{StaticResource Muted}" FontSize="12" Margin="0,2,0,0" />
+            </StackPanel>
+        </DockPanel>
+
+        <Border Style="{StaticResource Divider}" />
+
+        <!-- Details -->
+        <ctrl:LabeledField Label="Title">
+            <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}" />
+        </ctrl:LabeledField>
+        <ctrl:LabeledField Label="Description">
+            <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                     AcceptsReturn="True" TextWrapping="Wrap" Height="64" VerticalScrollBarVisibility="Auto" />
+        </ctrl:LabeledField>
+        <ctrl:LabeledField Label="Priority">
+            <ComboBox SelectedValue="{Binding Priority}" SelectedValuePath="Content">
+                <ComboBoxItem Content="Low" />
+                <ComboBoxItem Content="Medium" />
+                <ComboBoxItem Content="High" />
+            </ComboBox>
+        </ctrl:LabeledField>
+
+        <Border Style="{StaticResource Divider}" />
+
+        <!-- Assignment -->
+        <TextBlock Text="ASSIGNMENT" Style="{StaticResource SectionCaption}" />
+        <DockPanel>
+            <Button DockPanel.Dock="Right" Content="Assign" Command="{Binding AssignCommand}" Margin="8,0,0,0" />
+            <ComboBox ItemsSource="{Binding Users}" SelectedItem="{Binding SelectedAssignee}"
+                      DisplayMemberPath="FullName" VerticalAlignment="Center" />
+        </DockPanel>
+
+        <!-- Workflow lifecycle -->
+        <TextBlock Text="WORKFLOW" Style="{StaticResource SectionCaption}" Margin="0,14,0,6" />
+        <StackPanel Orientation="Horizontal">
+            <Button Content="Start" Command="{Binding StartCommand}" Margin="0,0,8,0" />
+            <Button Content="Complete" Command="{Binding CompleteCommand}" />
+        </StackPanel>
+
+        <Border Style="{StaticResource Divider}" />
+
+        <!-- Footer actions -->
+        <DockPanel LastChildFill="False">
+            <Button DockPanel.Dock="Right" Content="Close" Command="{Binding CloseCommand}" Margin="8,0,0,0" />
+            <Button DockPanel.Dock="Right" Content="Save changes" Style="{StaticResource PrimaryButton}"
+                    Command="{Binding SaveCommand}" />
+        </DockPanel>
+        <TextBlock Text="{Binding Status}" Style="{StaticResource StatusText}" />
+    </StackPanel>
+</UserControl>

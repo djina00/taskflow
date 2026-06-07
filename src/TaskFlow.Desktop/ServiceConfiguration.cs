@@ -1,9 +1,13 @@
 using System.IO;
 using Microsoft.Extensions.DependencyInjection;
+using TaskFlow.Desktop.Services;
 using TaskFlow.Desktop.ViewModels;
 using TaskFlow.Infrastructure;
+using TaskFlow.Modules.Projects.Application.Contracts;
+using TaskFlow.Modules.Tasks.Application.Contracts;
 using TaskFlow.SharedKernel.Domain;
 using TaskFlow.SharedKernel.Domain.Events;
+using TaskFlow.SharedKernel.Messaging;
 using TaskFlow.Modules.Notifications.Application;
 using TaskFlow.Modules.Notifications.Infrastructure;
 using TaskFlow.Modules.Projects.Application;
@@ -51,7 +55,33 @@ public static class ServiceConfiguration
             .AddReportsInfrastructure();
 
         // Presentation layer: shared session, feature view models and the windows.
+        services.AddSingleton<IConfirmationService, MessageBoxConfirmationService>();
         services.AddSingleton<SessionContext>();
+        services.AddSingleton<ProjectSelectionViewModel>();
+
+        // Modal detail dialogs: a generic host window plus factories that build a
+        // detail view model around the chosen project/task (the per-item value cannot
+        // come from the container, so the services are wired in by hand here).
+        services.AddSingleton<IDialogService, DialogService>();
+        services.AddTransient<DialogWindow>();
+        services.AddSingleton<Func<DialogWindow>>(provider => provider.GetRequiredService<DialogWindow>);
+        services.AddSingleton<Func<ProjectDto, ProjectDetailViewModel>>(provider =>
+            project => new ProjectDetailViewModel(project,
+                provider.GetRequiredService<ICommandDispatcher>()));
+        services.AddSingleton<Func<TaskItemDto, TaskDetailViewModel>>(provider =>
+            task => new TaskDetailViewModel(task,
+                provider.GetRequiredService<ICommandDispatcher>(),
+                provider.GetRequiredService<IQueryDispatcher>()));
+
+        // Creation dialogs: a fresh view model is built each time the "Add" button opens
+        // the dialog, so the form starts empty every time.
+        services.AddTransient<ProjectCreateViewModel>();
+        services.AddSingleton<Func<ProjectCreateViewModel>>(provider =>
+            provider.GetRequiredService<ProjectCreateViewModel>);
+        services.AddTransient<TaskCreateViewModel>();
+        services.AddSingleton<Func<TaskCreateViewModel>>(provider =>
+            provider.GetRequiredService<TaskCreateViewModel>);
+
         services.AddSingleton<LoginViewModel>();
         services.AddSingleton<RegisterViewModel>();
         services.AddSingleton<ProjectsViewModel>();

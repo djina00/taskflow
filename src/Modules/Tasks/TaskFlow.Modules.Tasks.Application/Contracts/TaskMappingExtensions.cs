@@ -16,6 +16,7 @@ internal static class TaskMappingExtensions
         task.Description,
         task.Priority.ToString(),
         task.Status.ToString(),
+        task.ReporterId,
         task.AssigneeId,
         task.CreatedOnUtc,
         task.CompletedOnUtc,

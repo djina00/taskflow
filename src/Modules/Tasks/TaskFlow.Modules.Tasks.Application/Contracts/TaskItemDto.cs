@@ -12,6 +12,7 @@ public sealed record TaskItemDto(
     string Description,
     string Priority,
     string Status,
+    Guid ReporterId,
     Guid? AssigneeId,
     DateTime CreatedOnUtc,
     DateTime? CompletedOnUtc,

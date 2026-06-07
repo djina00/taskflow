@@ -13,7 +13,7 @@ public class AssignTaskCommandHandlerTests
     [Fact]
     public async Task Assigns_an_existing_task_to_a_user()
     {
-        var task = TaskItem.Create(Guid.NewGuid(), "Punch the cards", null, TaskPriority.Medium).Value;
+        var task = TaskItem.Create(Guid.NewGuid(), "Punch the cards", null, TaskPriority.Medium, Guid.NewGuid()).Value;
         await _tasks.AddAsync(task);
         var assignee = Guid.NewGuid();
 

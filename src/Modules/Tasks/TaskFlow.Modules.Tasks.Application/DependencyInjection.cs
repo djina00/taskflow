@@ -3,7 +3,9 @@ using TaskFlow.Modules.Tasks.Application.Commands.AddComment;
 using TaskFlow.Modules.Tasks.Application.Commands.AssignTask;
 using TaskFlow.Modules.Tasks.Application.Commands.CompleteTask;
 using TaskFlow.Modules.Tasks.Application.Commands.CreateTask;
+using TaskFlow.Modules.Tasks.Application.Commands.DeleteTask;
 using TaskFlow.Modules.Tasks.Application.Commands.StartTask;
+using TaskFlow.Modules.Tasks.Application.Commands.UpdateTask;
 using TaskFlow.Modules.Tasks.Application.Contracts;
 using TaskFlow.Modules.Tasks.Application.Queries.GetTaskById;
 using TaskFlow.Modules.Tasks.Application.Queries.GetTasksByProject;
@@ -27,6 +29,8 @@ public static class DependencyInjection
         services.AddScoped<ICommandHandler<StartTaskCommand, Result>, StartTaskCommandHandler>();
         services.AddScoped<ICommandHandler<CompleteTaskCommand, Result>, CompleteTaskCommandHandler>();
         services.AddScoped<ICommandHandler<AddCommentCommand, Result>, AddCommentCommandHandler>();
+        services.AddScoped<ICommandHandler<UpdateTaskCommand, Result>, UpdateTaskCommandHandler>();
+        services.AddScoped<ICommandHandler<DeleteTaskCommand, Result>, DeleteTaskCommandHandler>();
 
         services.AddScoped<IQueryHandler<GetTaskByIdQuery, Result<TaskItemDto>>, GetTaskByIdQueryHandler>();
         services.AddScoped<IQueryHandler<GetTasksByProjectQuery, IReadOnlyList<TaskItemDto>>, GetTasksByProjectQueryHandler>();

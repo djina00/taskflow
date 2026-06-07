@@ -1,13 +1,11 @@
-using System.Windows.Input;
-
 namespace TaskFlow.Desktop.Mvvm;
 
 /// <summary>
-/// An <see cref="ICommand"/> that runs an asynchronous handler — the bridge from a
-/// button click to an <c>async</c> use-case call on a dispatcher. It disables
+/// An <see cref="IRelayCommand"/> that runs an asynchronous handler — the bridge from
+/// a button click to an <c>async</c> use-case call on a dispatcher. It disables
 /// itself while running so a slow operation cannot be triggered twice.
 /// </summary>
-public sealed class AsyncRelayCommand : ICommand
+public sealed class AsyncRelayCommand : IRelayCommand
 {
     private readonly Func<Task> _execute;
     private readonly Func<bool>? _canExecute;
