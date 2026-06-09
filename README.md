@@ -56,4 +56,6 @@ dotnet test
 dotnet run --project src/TaskFlow.Desktop
 ```
 
-> Documentation (C4 diagrams, dependency diagram, architectural decisions) lives in the `docs/` folder.
+## Documentation
+
+Architecture documentation lives in the [`docs/TaskFlow-Architecture.pdf`]
